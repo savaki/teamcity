@@ -5,3 +5,8 @@
 /.idea
 /.idea_modules
 
+# ignore binary
+/teamcity/teamcity
+
+# ignore local settings
+/*.env
