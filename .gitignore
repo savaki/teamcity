@@ -1,0 +1,7 @@
+# ignore intellij files
+/*.iml
+/*.ipr
+/*.iws
+/.idea
+/.idea_modules
+
