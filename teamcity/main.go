@@ -111,6 +111,31 @@ func main() {
 					Usage: "list the builds that have been executed for a given project",
 					Flags: append(globalFlags, []cli.Flag{
 						cli.StringFlag{"build-type-id", "", "the build type id"},
+						cli.IntFlag{"last", 1, "how many builds to retrieve"},
+					}...),
+					Action: func(c *cli.Context) {
+						client := Get80Client(c)
+						buildTypeId := c.String("build-type-id")
+						last := c.Int("last")
+						if buildTypeId == "" {
+							log.Fatalln("ERROR: required parameter, build-type-id, not specified")
+						}
+						locator := v80.BuildTypeLocator{Id: buildTypeId}
+						builds, err := client.Builds(locator)
+
+						filtered := []*v80.Build{}
+						for i := 0; builds.Builds != nil && i < len(builds.Builds) && i < last; i++ {
+							filtered = append(filtered, builds.Builds[i])
+						}
+
+						Print(v80.Builds{Builds: filtered}, err)
+					},
+				},
+				{
+					Name:  "status",
+					Usage: "the status of the last build of this type",
+					Flags: append(globalFlags, []cli.Flag{
+						cli.StringFlag{"build-type-id", "", "the build type id"},
 					}...),
 					Action: func(c *cli.Context) {
 						client := Get80Client(c)
@@ -120,7 +145,21 @@ func main() {
 						}
 						locator := v80.BuildTypeLocator{Id: buildTypeId}
 						builds, err := client.Builds(locator)
-						Print(builds, err)
+						if err != nil {
+							log.Fatalln(err)
+						}
+
+						if builds.Builds == nil || len(builds.Builds) == 0 {
+							log.Fatalf("ERROR: no builds yet for this project\n")
+						}
+
+						build := builds.Builds[0]
+						fmt.Println(build.Status)
+						if build.Status == "SUCCESS" {
+							os.Exit(0)
+						} else {
+							os.Exit(1)
+						}
 					},
 				},
 				{
