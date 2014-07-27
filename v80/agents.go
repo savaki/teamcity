@@ -1,11 +1,15 @@
 package v80
 
-import "net/url"
+import (
+	"log"
+	"net/url"
+	"regexp"
+)
 
 type Agents struct {
-	Href   string  `xml:"href,attr,omitempty" json:"href,omitempty"`
-	Count  int     `xml:"count,attr,omitempty" json:"count,omitempty"`
-	Agents []Agent `xml:"agent,omitempty" json:"agents,omitempty"`
+	Href   string   `xml:"href,attr,omitempty" json:"href,omitempty"`
+	Count  int      `xml:"count,attr,omitempty" json:"count,omitempty"`
+	Agents []*Agent `xml:"agent,omitempty" json:"agents,omitempty"`
 }
 
 type Agent struct {
@@ -20,8 +24,8 @@ type Agent struct {
 	UpToDate   bool   `xml:"updatodate,attr,omitempty" json:"updatodate,attr,omitempty"`
 	Ip         string `xml:"ip,attr,omitempty" json:"ip,attr,omitempty"`
 
-	Properties []Property `xml:"property,omitempty" json:"property,omitempty"`
-	Pool       *AgentPool `xml:"pool,omitempty" json:"pool,omitempty"`
+	Properties []*Property `xml:"properties>property,omitempty" json:"properties,omitempty"`
+	Pool       *AgentPool  `xml:"pool,omitempty" json:"pool,omitempty"`
 }
 
 type Property struct {
@@ -38,6 +42,30 @@ type AgentPool struct {
 	Agents   *Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
 }
 
+type AgentFilter func(*Agent) bool
+
+type AgentAccessor func(*Agent) string
+
+func AgentIdAccessor(agent *Agent) string {
+	return agent.Id
+}
+
+func AgentNameAccessor(agent *Agent) string {
+	return agent.Name
+}
+
+func NewFilter(name string, accessor AgentAccessor) AgentFilter {
+	matcher, err := regexp.Compile(name)
+	if err != nil {
+		log.Fatalf("unable to filter by name, invalid regexp for name, %s\n", name)
+	}
+
+	return func(agent *Agent) bool {
+		value := accessor(agent)
+		return matcher.Match([]byte(value))
+	}
+}
+
 func (tc *TeamCity) Agents() (*Agents, error) {
 	server, err := tc.Server()
 	if err != nil {
@@ -49,6 +77,26 @@ func (tc *TeamCity) Agents() (*Agents, error) {
 	return agents, err
 }
 
-func (a Agent) Info() (*Agent, error) {
-	return nil, nil
+func (tc *TeamCity) FindAgents(filters []AgentFilter) ([]*Agent, error) {
+	agents, err := tc.Agents()
+	if err != nil {
+		return nil, err
+	}
+
+	filteredAgents := []*Agent{}
+
+	for _, agent := range agents.Agents {
+		includeAgent := true
+		for _, filter := range filters {
+			if !filter(agent) {
+				includeAgent = false
+			}
+		}
+
+		if includeAgent {
+			filteredAgents = append(filteredAgents, agent)
+		}
+	}
+
+	return filteredAgents, nil
 }
