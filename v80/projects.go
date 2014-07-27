@@ -17,7 +17,12 @@ type Projects struct {
 }
 
 func (tc *TeamCity) Projects() (*Projects, error) {
+	server, err := tc.Server()
+	if err != nil {
+		return nil, err
+	}
+
 	projects := &Projects{}
-	err := tc.get("/app/rest/projects", url.Values{}, projects)
+	err = tc.get(server.Projects.Href, url.Values{}, projects)
 	return projects, err
 }

@@ -19,7 +19,7 @@ type TeamCity struct {
 
 func getFn(client *http.Client, auth *teamcity.Auth, codebase string) func(path string, params url.Values) (io.ReadCloser, error) {
 	return func(path string, params url.Values) (io.ReadCloser, error) {
-		theUrl := fmt.Sprintf("%s/httpAuth%s", codebase, path)
+		theUrl := fmt.Sprintf("%s%s", codebase, path)
 		queryParams := params.Encode()
 		if len(queryParams) > 0 {
 			theUrl = theUrl + "?" + queryParams

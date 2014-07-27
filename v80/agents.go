@@ -34,12 +34,21 @@ type AgentPool struct {
 	Name string `xml:"name,attr,omitempty" json:"name,attr,omitempty"`
 	Href string `xml:"href,attr,omitempty" json:"href,attr,omitempty"`
 
-	Projects Projects `xml:"projects,omitempty" json:"projects,omitempty"`
-	Agents   Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
+	Projects *Projects `xml:"projects,omitempty" json:"projects,omitempty"`
+	Agents   *Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
 }
 
 func (tc *TeamCity) Agents() (*Agents, error) {
+	server, err := tc.Server()
+	if err != nil {
+		return nil, err
+	}
+
 	agents := &Agents{}
-	err := tc.get("/app/rest/agents", url.Values{}, agents)
+	err = tc.get(server.Agents.Href, url.Values{}, agents)
 	return agents, err
+}
+
+func (a Agent) Info() (*Agent, error) {
+	return nil, nil
 }
