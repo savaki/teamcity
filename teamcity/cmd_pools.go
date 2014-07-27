@@ -11,6 +11,7 @@ var agentPoolsCommand = cli.Command{
 		{
 			Name: "list",
 			Flags: []cli.Flag{
+				FlagAgentPoolName,
 				FlagVerbose,
 			},
 			Action: agentPoolListAction,
@@ -24,5 +25,8 @@ func agentPoolListAction(c *cli.Context) {
 	opts := options(c)
 	v80.Verbose = opts.Verbose
 
-	Print(client.AgentPools())
+	agentPoolName := c.String(FLAG_AGENT_POOL_NAME)
+	poolFilter := v80.NewAgentPoolFilter(agentPoolName)
+
+	Print(client.FindAgentPools(poolFilter))
 }
