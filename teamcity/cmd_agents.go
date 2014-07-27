@@ -24,17 +24,19 @@ var agentCommand = cli.Command{
 			},
 			Action: agentFindAction,
 		},
+		{
+			Name: "authorize",
+			Flags: []cli.Flag{
+				FlagAgentName,
+				FlagAgentId,
+				FlagVerbose,
+			},
+			Action: agentAuthorizeAction,
+		},
 	},
 }
 
-func agentListAction(c *cli.Context) {
-	client := Get80Client(c)
-	Print(client.Agents())
-}
-
-func agentFindAction(c *cli.Context) {
-	client := Get80Client(c)
-
+func agentFilters(c *cli.Context) v80.AgentFilters {
 	filters := []v80.AgentFilter{}
 
 	// filter by id
@@ -53,5 +55,24 @@ func agentFindAction(c *cli.Context) {
 		}
 	}
 
+	return filters
+}
+
+func agentListAction(c *cli.Context) {
+	client := Get80Client(c)
+	Print(client.Agents())
+}
+
+func agentFindAction(c *cli.Context) {
+	client := Get80Client(c)
+	filters := agentFilters(c)
+
 	Print(client.FindAgents(filters))
+}
+
+func agentAuthorizeAction(c *cli.Context) {
+	client := Get80Client(c)
+	filters := agentFilters(c)
+
+	client.AuthorizeAgents(filters)
 }

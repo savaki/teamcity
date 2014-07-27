@@ -1,9 +1,12 @@
 package v80
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 type Agents struct {
@@ -114,4 +117,27 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	}
 
 	return filteredAgents, nil
+}
+
+func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) error {
+	agents, err := tc.FindAgents(filters)
+	if err != nil {
+		return err
+	}
+
+	for _, agent := range agents {
+		details := &Agent{}
+		err = tc.get(agent.Href, url.Values{}, details)
+		if err != nil {
+			return err
+		}
+
+		if !details.Authorized {
+			path := fmt.Sprintf("%s/authorized", details.Href)
+			body := ioutil.NopCloser(strings.NewReader("true"))
+			tc.put(path, url.Values{}, body)
+		}
+	}
+
+	return nil
 }
