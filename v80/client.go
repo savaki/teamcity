@@ -11,58 +11,69 @@ import (
 	"net/url"
 )
 
+var Verbose bool = false
+
 type TeamCity struct {
-	auth     *teamcity.Auth
-	get      func(string, url.Values, interface{}) error
-	Download func(string, url.Values) (io.ReadCloser, error)
+	httpFn func(method, path string, params url.Values, body io.ReadCloser) (io.ReadCloser, error)
 }
 
-func getFn(client *http.Client, auth *teamcity.Auth, codebase string) func(path string, params url.Values) (io.ReadCloser, error) {
-	return func(path string, params url.Values) (io.ReadCloser, error) {
-		theUrl := fmt.Sprintf("%s%s", codebase, path)
+func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(method, path string, params url.Values, body io.ReadCloser) (io.ReadCloser, error) {
+	return func(method, path string, params url.Values, body io.ReadCloser) (io.ReadCloser, error) {
+		urlStr := fmt.Sprintf("%s%s", codebase, path)
 		queryParams := params.Encode()
 		if len(queryParams) > 0 {
-			theUrl = theUrl + "?" + queryParams
+			urlStr = urlStr + "?" + queryParams
 		}
 
-		request, err := http.NewRequest("GET", theUrl, nil)
+		if Verbose {
+			fmt.Printf("%s %s\n", method, urlStr)
+		}
+
+		req, err := http.NewRequest(method, urlStr, body)
 		if err != nil {
 			return nil, err
 		}
-		request.SetBasicAuth(auth.Username, auth.Password)
 
-		response, err := client.Do(request)
+		req.SetBasicAuth(auth.Username, auth.Password)
+		response, err := client.Do(req)
 		if err != nil {
 			return nil, err
+		}
+
+		if Verbose {
+			fmt.Printf("status code => %d\n", response.StatusCode)
 		}
 
 		return response.Body, nil
 	}
 }
 
-func getXmlFn(client *http.Client, auth *teamcity.Auth, codebase string) func(path string, params url.Values, result interface{}) error {
-	get := getFn(client, auth, codebase)
+func (t *TeamCity) put(path string, params url.Values, body io.ReadCloser) (io.ReadCloser, error) {
+	return t.httpFn("PUT", path, params, body)
+}
 
-	return func(path string, params url.Values, result interface{}) error {
-		body, err := get(path, params)
-		if err != nil {
-			return err
-		}
-
-		defer body.Close()
-		switch value := result.(type) {
-		case *string:
-			data, err := ioutil.ReadAll(body)
-			if err != nil {
-				return nil
-			}
-			*value = string(data)
-			return nil
-
-		default:
-			return xml.NewDecoder(body).Decode(result)
-		}
+func (t *TeamCity) get(path string, params url.Values, target interface{}) error {
+	body, err := t.httpFn("GET", path, params, nil)
+	if err != nil {
+		return err
 	}
+
+	switch value := target.(type) {
+	case *string:
+		data, err := ioutil.ReadAll(body)
+		if err != nil {
+			return nil
+		}
+		*value = string(data)
+		return nil
+
+	default:
+		return xml.NewDecoder(body).Decode(target)
+	}
+}
+
+func (t *TeamCity) Download(path string, params url.Values) (io.ReadCloser, error) {
+	return t.httpFn("GET", path, params, nil)
 }
 
 func New(auth *teamcity.Auth, codebase string) *TeamCity {
@@ -74,8 +85,6 @@ func New(auth *teamcity.Auth, codebase string) *TeamCity {
 	}
 
 	return &TeamCity{
-		auth:     auth,
-		get:      getXmlFn(client, auth, codebase),
-		Download: getFn(client, auth, codebase),
+		httpFn: httpFn(client, auth, codebase),
 	}
 }

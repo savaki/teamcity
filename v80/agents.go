@@ -42,6 +42,8 @@ type AgentPool struct {
 	Agents   *Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
 }
 
+type AgentFilters []AgentFilter
+
 type AgentFilter func(*Agent) bool
 
 type AgentAccessor func(*Agent) string
@@ -66,6 +68,19 @@ func NewFilter(name string, accessor AgentAccessor) AgentFilter {
 	}
 }
 
+func (tc *TeamCity) UpdateAgent(filters AgentFilters, field string, value string) error {
+	agents, err := tc.FindAgents(filters)
+	if err != nil {
+		return err
+	}
+
+	for _, agent := range agents {
+		println(agent.Href)
+	}
+
+	return nil
+}
+
 func (tc *TeamCity) Agents() (*Agents, error) {
 	server, err := tc.Server()
 	if err != nil {
@@ -77,7 +92,7 @@ func (tc *TeamCity) Agents() (*Agents, error) {
 	return agents, err
 }
 
-func (tc *TeamCity) FindAgents(filters []AgentFilter) ([]*Agent, error) {
+func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	agents, err := tc.Agents()
 	if err != nil {
 		return nil, err

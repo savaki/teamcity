@@ -1,6 +1,8 @@
 package teamcity
 
-import "os"
+import (
+	"os"
+)
 
 const (
 	TEAMCITY_URL      = "TEAMCITY_URL"

@@ -9,6 +9,9 @@ var projectCommand = cli.Command{
 		{
 			Name:  "list",
 			Usage: "list the projects on this server",
+			Flags: []cli.Flag{
+				FlagVerbose,
+			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
 				projects, err := client.Projects()

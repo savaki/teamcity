@@ -5,23 +5,22 @@ import (
 	"github.com/savaki/teamcity/v80"
 )
 
-const (
-	FLAG_AGENT_NAME = "agent-name"
-	FLAG_AGENT_ID   = "agent-id"
-)
-
 var agentCommand = cli.Command{
 	Name: "agent",
 	Subcommands: []cli.Command{
 		{
-			Name:   "list",
+			Name: "list",
+			Flags: []cli.Flag{
+				FlagVerbose,
+			},
 			Action: agentListAction,
 		},
 		{
 			Name: "find",
 			Flags: []cli.Flag{
-				cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"},
-				cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"},
+				FlagAgentName,
+				FlagAgentId,
+				FlagVerbose,
 			},
 			Action: agentFindAction,
 		},
