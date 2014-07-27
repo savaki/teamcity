@@ -12,7 +12,8 @@ type Project struct {
 }
 
 type Projects struct {
-	Projects []*Project `xml:"project" json:"projects"`
+	Href     string     `xml:"href,attr,omitempty" json:"href,attr,omitempty"`
+	Projects []*Project `xml:"project,omitempty" json:"projects,omitempty"`
 }
 
 func (tc *TeamCity) Projects() (*Projects, error) {

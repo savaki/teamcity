@@ -26,7 +26,7 @@ func Print(value interface{}, err error) {
 }
 
 func Get80Client(c *cli.Context) *v80.TeamCity {
-	codebase := os.Getenv("TEAMCITY_URL")
+	codebase := os.Getenv(teamcity.TEAMCITY_URL)
 	if value := c.String("url"); value != "" {
 		codebase = value
 	}
@@ -34,7 +34,7 @@ func Get80Client(c *cli.Context) *v80.TeamCity {
 		log.Fatalln("ERROR: TeamCity url not set")
 	}
 
-	username := os.Getenv("TEAMCITY_USERNAME")
+	username := os.Getenv(teamcity.TEAMCITY_USERNAME)
 	if value := c.String("username"); value != "" {
 		username = value
 	}
@@ -42,7 +42,7 @@ func Get80Client(c *cli.Context) *v80.TeamCity {
 		log.Fatalln("ERROR: TeamCity username not set")
 	}
 
-	password := os.Getenv("TEAMCITY_PASSWORD")
+	password := os.Getenv(teamcity.TEAMCITY_PASSWORD)
 	if value := c.String("password"); value != "" {
 		password = value
 	}
@@ -72,26 +72,12 @@ func main() {
 			Flags: globalFlags,
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
-				serverInfo, err := client.ServerInfo()
-				Print(serverInfo, err)
+				server, err := client.Server()
+				Print(server, err)
 			},
 		},
-		{
-			Name:  "project",
-			Usage: "project related commands",
-			Subcommands: []cli.Command{
-				{
-					Name:  "list",
-					Usage: "list the projects on this server",
-					Flags: globalFlags,
-					Action: func(c *cli.Context) {
-						client := Get80Client(c)
-						projects, err := client.Projects()
-						Print(projects, err)
-					},
-				},
-			},
-		},
+		projectCommand,
+		agentCommand,
 		{
 			Name:  "build",
 			Usage: "build elated commands",

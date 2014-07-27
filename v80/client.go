@@ -79,20 +79,3 @@ func New(auth *teamcity.Auth, codebase string) *TeamCity {
 		Download: getFn(client, auth, codebase),
 	}
 }
-
-type ServerInfo struct {
-	Version      string `xml:"version,attr" json:"version"`
-	VersionMajor string `xml:"versionMajor,attr" json:"versionMajor"`
-	VersionMinor string `xml:"versionMinor,attr" json:"versionMinor"`
-	StartTime    string `xml:"startTime,attr" json:"startTime"`
-	CurrentTime  string `xml:"currentTime,attr" json:"currentTime"`
-	BuildNumber  string `xml:"buildNumber,attr" json:"buildNumber"`
-	BuildDate    string `xml:"buildDate,attr" json:"buildDate"`
-	InternalId   string `xml:"internalId,attr" json:"internalId"`
-}
-
-func (tc *TeamCity) ServerInfo() (*ServerInfo, error) {
-	result := &ServerInfo{}
-	err := tc.get("/app/rest/server", url.Values{}, result)
-	return result, err
-}
