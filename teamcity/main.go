@@ -61,10 +61,11 @@ func main() {
 	app.Usage = "a command line interface for TeamCity"
 	app.Version = "0.0.1"
 	app.Commands = []cli.Command{
-		serverCommand,
-		projectCommand,
 		agentCommand,
+		agentPoolsCommand,
 		buildCommand,
+		projectCommand,
+		serverCommand,
 	}
 	app.Run(os.Args)
 }

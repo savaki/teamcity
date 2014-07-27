@@ -8,8 +8,9 @@ const (
 	FLAG_PASSWORD = "password"
 	FLAG_VERBOSE  = "verbose"
 
-	FLAG_AGENT_NAME = "agent-name"
-	FLAG_AGENT_ID   = "agent-id"
+	FLAG_AGENT_ID        = "agent-id"
+	FLAG_AGENT_NAME      = "agent-name"
+	FLAG_AGENT_POOL_NAME = "agent-pool-name"
 
 	FLAG_BUILD_ID            = "build-id"
 	FLAG_BUILD_TYPE_ID       = "build-type-id"
@@ -24,8 +25,9 @@ var (
 	FlagPassword = cli.StringFlag{FLAG_PASSWORD, "", "TeamCity password"}
 	FlagVerbose  = cli.BoolFlag{FLAG_VERBOSE, "additional content"}
 
-	FlagAgentName = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
-	FlagAgentId   = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
+	FlagAgentId       = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
+	FlagAgentName     = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
+	FlagAgentPoolName = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "filter by agent pool name"}
 
 	FlagBuildId      = cli.StringFlag{FLAG_BUILD_ID, "", "the build to retrieve details for"}
 	FlagBuildTypeId  = cli.StringFlag{FLAG_BUILD_TYPE_ID, "", "the build type id"}

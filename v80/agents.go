@@ -36,15 +36,6 @@ type Property struct {
 	Value string `xml:"value,attr,omitempty" json:"value,attr,omitempty"`
 }
 
-type AgentPool struct {
-	Id   string `xml:"id,attr,omitempty" json:"id,attr,omitempty"`
-	Name string `xml:"name,attr,omitempty" json:"name,attr,omitempty"`
-	Href string `xml:"href,attr,omitempty" json:"href,attr,omitempty"`
-
-	Projects *Projects `xml:"projects,omitempty" json:"projects,omitempty"`
-	Agents   *Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
-}
-
 type AgentFilters []AgentFilter
 
 type AgentFilter func(*Agent) bool
@@ -59,7 +50,7 @@ func AgentNameAccessor(agent *Agent) string {
 	return agent.Name
 }
 
-func NewFilter(name string, accessor AgentAccessor) AgentFilter {
+func NewAgentFilter(name string, accessor AgentAccessor) AgentFilter {
 	matcher, err := regexp.Compile(name)
 	if err != nil {
 		log.Fatalf("unable to filter by name, invalid regexp for name, %s\n", name)

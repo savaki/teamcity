@@ -12,8 +12,9 @@ type Server struct {
 	BuildDate    string `xml:"buildDate,attr,omitempty" json:"buildDate,attr,omitempty"`
 	InternalId   string `xml:"internalId,attr,omitempty" json:"internalId,attr,omitempty"`
 
-	Projects *Projects `xml:"projects,omitempty" json:"projects,omitempty"`
-	Agents   *Agents   `xml:"agents,omitempty" json:"agents,omitempty"`
+	Projects   *Projects   `xml:"projects,omitempty" json:"projects,omitempty"`
+	Agents     *Agents     `xml:"agents,omitempty" json:"agents,omitempty"`
+	AgentPools *AgentPools `xml:"agentPools,omitempty" json:"agent-pools,omitempty"`
 }
 
 func (tc *TeamCity) Server() (*Server, error) {

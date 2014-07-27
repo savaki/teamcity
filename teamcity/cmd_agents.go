@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/codegangsta/cli"
 	"github.com/savaki/teamcity/v80"
+	"log"
 )
 
 var agentCommand = cli.Command{
@@ -33,6 +34,16 @@ var agentCommand = cli.Command{
 			},
 			Action: agentAuthorizeAction,
 		},
+		{
+			Name: "assign-to-pool",
+			Flags: []cli.Flag{
+				FlagAgentId,
+				FlagAgentName,
+				FlagAgentPoolName,
+				FlagVerbose,
+			},
+			Action: agentAssignToPoolAction,
+		},
 	},
 }
 
@@ -42,7 +53,7 @@ func agentFilters(c *cli.Context) v80.AgentFilters {
 	// filter by id
 	if values := c.StringSlice(FLAG_AGENT_ID); values != nil {
 		for _, nameFilter := range values {
-			filter := v80.NewFilter(nameFilter, v80.AgentIdAccessor)
+			filter := v80.NewAgentFilter(nameFilter, v80.AgentIdAccessor)
 			filters = append(filters, filter)
 		}
 	}
@@ -50,7 +61,7 @@ func agentFilters(c *cli.Context) v80.AgentFilters {
 	// filter by name
 	if values := c.StringSlice(FLAG_AGENT_NAME); values != nil {
 		for _, nameFilter := range values {
-			filter := v80.NewFilter(nameFilter, v80.AgentNameAccessor)
+			filter := v80.NewAgentFilter(nameFilter, v80.AgentNameAccessor)
 			filters = append(filters, filter)
 		}
 	}
@@ -75,4 +86,20 @@ func agentAuthorizeAction(c *cli.Context) {
 	filters := agentFilters(c)
 
 	client.AuthorizeAgents(filters)
+}
+
+func agentAssignToPoolAction(c *cli.Context) {
+	client := Get80Client(c)
+	filters := agentFilters(c)
+
+	agentPoolName := c.String(FLAG_AGENT_POOL_NAME)
+	if agentPoolName == "" {
+		log.Fatalf("no agent pool name specified via flag --%s\n", FLAG_AGENT_POOL_NAME)
+	}
+	poolFilter := v80.NewAgentPoolFilter(agentPoolName)
+
+	err := client.AssignAgentsToPool(filters, poolFilter)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

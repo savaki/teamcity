@@ -152,8 +152,8 @@ var buildCommand = cli.Command{
 
 func buildDownloadArtifact(c *cli.Context) {
 	client := Get80Client(c)
-	buildId := c.String("build-id")
-	artifactName := c.String("artifact-name")
+	buildId := c.String(FLAG_BUILD_ID)
+	artifactName := c.String(FLAG_BUILD_ARTIFACT_NAME)
 	if buildId == "" {
 		log.Fatalln("ERROR: required parameter, build-id, not specified")
 	}
