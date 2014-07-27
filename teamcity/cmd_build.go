@@ -42,8 +42,8 @@ var buildCommand = cli.Command{
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
-				buildTypeId := c.String("build-type-id")
-				last := c.Int("last")
+				buildTypeId := c.String(FLAG_BUILD_TYPE_ID)
+				last := c.Int(FLAG_LAST)
 				if buildTypeId == "" {
 					log.Fatalln("ERROR: required parameter, build-type-id, not specified")
 				}
@@ -70,7 +70,7 @@ var buildCommand = cli.Command{
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
-				buildTypeId := c.String("build-type-id")
+				buildTypeId := c.String(FLAG_BUILD_TYPE_ID)
 				if buildTypeId == "" {
 					log.Fatalln("ERROR: required parameter, build-type-id, not specified")
 				}
@@ -106,7 +106,7 @@ var buildCommand = cli.Command{
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
-				buildId := c.String("build-id")
+				buildId := c.String(FLAG_BUILD_ID)
 				if buildId == "" {
 					log.Fatalln("ERROR: required parameter, build-id, not specified")
 				}
@@ -126,7 +126,7 @@ var buildCommand = cli.Command{
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
-				buildId := c.String("build-id")
+				buildId := c.String(FLAG_BUILD_ID)
 				if buildId == "" {
 					log.Fatalln("ERROR: required parameter, build-id, not specified")
 				}
