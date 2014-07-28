@@ -88,8 +88,18 @@ func agentFindAction(c *cli.Context) {
 func agentAuthorizeAction(c *cli.Context) {
 	client := Get80Client(c)
 	filters := agentFilters(c)
+	opts := options(c)
+	v80.Verbose = opts.Verbose
+	v80.Trace = opts.Trace
 
-	client.AuthorizeAgents(filters)
+	agentsAuthorized, err := client.AuthorizeAgents(filters)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if opts.Verbose {
+		log.Printf("%d agent(s) authorized\n", agentsAuthorized)
+	}
 }
 
 func agentAssignToPoolAction(c *cli.Context) {

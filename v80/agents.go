@@ -117,25 +117,30 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	return filteredAgents, nil
 }
 
-func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) error {
+func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) (int, error) {
 	agents, err := tc.FindAgents(filters)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
+	agentsAuthorized := 0
 	for _, agent := range agents {
 		details := &Agent{}
 		err = tc.get(agent.Href, url.Values{}, details)
 		if err != nil {
-			return err
+			return agentsAuthorized, err
 		}
 
 		if !details.Authorized {
+			if Verbose {
+				log.Printf("authorizing agent, %s (%s)\n", agent.Name, agent.Ip)
+			}
 			path := fmt.Sprintf("%s/authorized", details.Href)
 			body := ioutil.NopCloser(strings.NewReader("true"))
 			tc.put(path, url.Values{}, body, "text/plain")
+			agentsAuthorized = agentsAuthorized + 1
 		}
 	}
 
-	return nil
+	return agentsAuthorized, nil
 }
