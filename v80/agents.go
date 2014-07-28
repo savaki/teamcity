@@ -76,16 +76,20 @@ func AgentNameAccessor(agent *Agent) string {
 	return agent.Name
 }
 
+func AgentConnectedAccessor(agent *Agent) string {
+	return fmt.Sprintf("%#v", agent.Connected)
+}
+
 func NoopAgentFilter(result bool) AgentFilter {
 	return func(*Agent) bool {
 		return result
 	}
 }
 
-func NewAgentFilter(name string, accessor AgentAccessor) AgentFilter {
-	matcher, err := regexp.Compile(name)
+func NewAgentFilter(value string, accessor AgentAccessor) AgentFilter {
+	matcher, err := regexp.Compile(value)
 	if err != nil {
-		log.Fatalf("unable to filter by name, invalid regexp for name, %s\n", name)
+		log.Fatalf("unable to filter by name, invalid regexp for name, %s\n", value)
 	}
 
 	return func(agent *Agent) bool {
@@ -127,12 +131,13 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	filteredAgents := []*Agent{}
 
 	for _, agent := range agents.Agents {
-		if filters.MatchesAnd(agent) {
-			a := &Agent{}
-			err = tc.get(agent.Href, url.Values{}, a)
-			if err != nil {
-				return nil, err
-			}
+		a := &Agent{}
+		err = tc.get(agent.Href, url.Values{}, a)
+		if err != nil {
+			return nil, err
+		}
+
+		if filters.MatchesAnd(a) {
 			filteredAgents = append(filteredAgents, a)
 		}
 	}
@@ -251,6 +256,10 @@ func (tc *TeamCity) RemoveDeauthorizedAgents(dryRun bool) (int, error) {
 			}
 			count = count + 1
 		}
+	}
+
+	if Verbose {
+		log.Printf("removed %d deauthorized and disconnected agent(s)\n", count)
 	}
 
 	return count, nil

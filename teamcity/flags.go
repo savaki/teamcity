@@ -10,10 +10,11 @@ const (
 	FLAG_TRACE    = "trace"
 	FLAG_DRY_RUN  = "dry-run"
 
-	FLAG_AGENT_ID        = "agent-id"
-	FLAG_AGENT_NAME      = "agent-name"
-	FLAG_AGENT_POOL_NAME = "agent-pool-name"
-	FLAG_ALL_AGENTS      = "all-agents"
+	FLAG_AGENT_ID          = "agent-id"
+	FLAG_AGENT_NAME        = "agent-name"
+	FLAG_AGENT_POOL_NAME   = "agent-pool-name"
+	FLAG_ALL_AGENTS        = "all-agents"
+	FLAG_DISCONNECTED_ONLY = "disconnected-only"
 
 	FLAG_BUILD_ID            = "build-id"
 	FLAG_BUILD_TYPE_ID       = "build-type-id"
@@ -30,10 +31,11 @@ var (
 	FlagTrace    = cli.BoolFlag{FLAG_TRACE, "developer level details"}
 	FlagDryRun   = cli.BoolFlag{FLAG_DRY_RUN, "dry-run, don't execute anything"}
 
-	FlagAgentId       = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
-	FlagAgentName     = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
-	FlagAgentPoolName = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)"}
-	FlagAllAgents     = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents"}
+	FlagAgentId          = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
+	FlagAgentName        = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
+	FlagAgentPoolName    = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)"}
+	FlagAllAgents        = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents"}
+	FlagDisconnectedOnly = cli.BoolFlag{FLAG_DISCONNECTED_ONLY, "include disconnected agents only"}
 
 	FlagBuildId      = cli.StringFlag{FLAG_BUILD_ID, "", "the build to retrieve details for"}
 	FlagBuildTypeId  = cli.StringFlag{FLAG_BUILD_TYPE_ID, "", "the build type id"}

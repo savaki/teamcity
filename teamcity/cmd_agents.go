@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/savaki/teamcity/v80"
 	"log"
@@ -44,6 +45,7 @@ var agentCommand = cli.Command{
 				FlagAgentName,
 				FlagAgentId,
 				FlagAllAgents,
+				FlagDisconnectedOnly,
 				FlagVerbose,
 				FlagTrace,
 			},
@@ -94,18 +96,23 @@ func agentFilters(c *cli.Context) v80.AgentFilters {
 		return append(filters, v80.NoopAgentFilter(true))
 	}
 
+	if c.Bool(FLAG_DISCONNECTED_ONLY) {
+		value := fmt.Sprintf("%#v", false)
+		filters = append(filters, v80.NewAgentFilter(value, v80.AgentConnectedAccessor))
+	}
+
 	// filter by id
 	if values := c.StringSlice(FLAG_AGENT_ID); values != nil {
-		for _, nameFilter := range values {
-			filter := v80.NewAgentFilter(nameFilter, v80.AgentIdAccessor)
+		for _, value := range values {
+			filter := v80.NewAgentFilter(value, v80.AgentIdAccessor)
 			filters = append(filters, filter)
 		}
 	}
 
 	// filter by name
 	if values := c.StringSlice(FLAG_AGENT_NAME); values != nil {
-		for _, nameFilter := range values {
-			filter := v80.NewAgentFilter(nameFilter, v80.AgentNameAccessor)
+		for _, value := range values {
+			filter := v80.NewAgentFilter(value, v80.AgentNameAccessor)
 			filters = append(filters, filter)
 		}
 	}
