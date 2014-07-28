@@ -17,7 +17,7 @@ type Agents struct {
 }
 
 type Agent struct {
-	XMLName xml.Name `xml:"agent"`
+	XMLName xml.Name `xml:"agent" json:"-"`
 	Id      string   `xml:"id,attr,omitempty" json:"id,attr,omitempty"`
 	Name    string   `xml:"name,attr,omitempty" json:"name,attr,omitempty"`
 	TypeId  string   `xml:"typeId,attr,omitempty" json:"typeId,attr,omitempty"`
@@ -39,6 +39,26 @@ type Property struct {
 }
 
 type AgentFilters []AgentFilter
+
+func (f AgentFilters) MatchesAnd(agent *Agent) bool {
+	for _, filter := range f {
+		if !filter(agent) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (f AgentFilters) MatchesOr(agent *Agent) bool {
+	for _, filter := range f {
+		if filter(agent) {
+			return true
+		}
+	}
+
+	return false
+}
 
 type AgentFilter func(*Agent) bool
 
@@ -97,14 +117,7 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	filteredAgents := []*Agent{}
 
 	for _, agent := range agents.Agents {
-		includeAgent := true
-		for _, filter := range filters {
-			if !filter(agent) {
-				includeAgent = false
-			}
-		}
-
-		if includeAgent {
+		if filters.MatchesAnd(agent) {
 			a := &Agent{}
 			err = tc.get(agent.Href, url.Values{}, a)
 			if err != nil {
