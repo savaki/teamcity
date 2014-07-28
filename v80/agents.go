@@ -239,7 +239,7 @@ func (tc *TeamCity) RemoveDeauthorizedAgents(dryRun bool) (int, error) {
 
 	count := 0
 	for _, agent := range agents {
-		if agent.Connected == false && agent.Authorized == false {
+		if !agent.Connected && !agent.Authorized {
 			if Verbose {
 				log.Printf("removing agent, %s (%s)\n", agent.Name, agent.Ip)
 			}

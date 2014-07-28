@@ -51,7 +51,7 @@ func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(meth
 			log.Printf("status code => %d\n", response.StatusCode)
 		}
 
-		if response.StatusCode != 200 {
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
 			if Verbose {
 				defer response.Body.Close()
 
