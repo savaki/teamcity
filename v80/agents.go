@@ -60,6 +60,10 @@ func (f AgentFilters) MatchesOr(agent *Agent) bool {
 	return false
 }
 
+func (f AgentFilters) IsEmpty() bool {
+	return len(f) == 0
+}
+
 type AgentFilter func(*Agent) bool
 
 type AgentAccessor func(*Agent) string

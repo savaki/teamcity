@@ -102,6 +102,10 @@ func agentAuthorizeAction(c *cli.Context) {
 	v80.Verbose = opts.Verbose
 	v80.Trace = opts.Trace
 
+	if filters.IsEmpty() {
+		log.Fatalf("agents must be specified via either --%s or --%s\n", FLAG_AGENT_ID, FLAG_AGENT_NAME)
+	}
+
 	agentsAuthorized, err := client.AuthorizeAgents(filters)
 	if err != nil {
 		log.Fatalln(err)
@@ -118,6 +122,10 @@ func agentDeauthorizeAction(c *cli.Context) {
 	opts := options(c)
 	v80.Verbose = opts.Verbose
 	v80.Trace = opts.Trace
+
+	if filters.IsEmpty() {
+		log.Fatalf("agents must be specified via either --%s or --%s\n", FLAG_AGENT_ID, FLAG_AGENT_NAME)
+	}
 
 	agentsAuthorized, err := client.DeauthorizeAgents(filters)
 	if err != nil {
@@ -136,6 +144,11 @@ func agentAssignToPoolAction(c *cli.Context) {
 	v80.Trace = opts.Trace
 	v80.Verbose = opts.Verbose
 
+	if filters.IsEmpty() {
+		log.Fatalf("agents must be specified via either --%s or --%s\n", FLAG_AGENT_ID, FLAG_AGENT_NAME)
+	}
+
+	// must specify a target pool to put the agents to
 	agentPoolName := c.String(FLAG_AGENT_POOL_NAME)
 	if agentPoolName == "" {
 		log.Fatalf("no agent pool name specified via flag --%s\n", FLAG_AGENT_POOL_NAME)
