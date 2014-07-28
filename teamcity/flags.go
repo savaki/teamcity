@@ -30,7 +30,7 @@ var (
 
 	FlagAgentId       = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
 	FlagAgentName     = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
-	FlagAgentPoolName = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "filter by agent pool name"}
+	FlagAgentPoolName = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)"}
 	FlagAllAgents     = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents"}
 
 	FlagBuildId      = cli.StringFlag{FLAG_BUILD_ID, "", "the build to retrieve details for"}
