@@ -10,6 +10,7 @@ var serverCommand = cli.Command{
 		FlagUsername,
 		FlagPassword,
 		FlagVerbose,
+		FlagTrace,
 	},
 	Action: func(c *cli.Context) {
 		client := Get80Client(c)

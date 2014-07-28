@@ -1,6 +1,7 @@
 package v80
 
 import (
+	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,10 +17,11 @@ type Agents struct {
 }
 
 type Agent struct {
-	Id     string `xml:"id,attr,omitempty" json:"id,attr,omitempty"`
-	Name   string `xml:"name,attr,omitempty" json:"name,attr,omitempty"`
-	TypeId string `xml:"typeId,attr,omitempty" json:"typeId,attr,omitempty"`
-	Href   string `xml:"href,attr,omitempty" json:"href,attr,omitempty"`
+	XMLName xml.Name `xml:"agent"`
+	Id      string   `xml:"id,attr,omitempty" json:"id,attr,omitempty"`
+	Name    string   `xml:"name,attr,omitempty" json:"name,attr,omitempty"`
+	TypeId  string   `xml:"typeId,attr,omitempty" json:"typeId,attr,omitempty"`
+	Href    string   `xml:"href,attr,omitempty" json:"href,attr,omitempty"`
 
 	Connected  bool   `xml:"connected,attr,omitempty" json:"connected,attr,omitempty"`
 	Enabled    bool   `xml:"enabled,attr,omitempty" json:"enabled,attr,omitempty"`
@@ -103,7 +105,12 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 		}
 
 		if includeAgent {
-			filteredAgents = append(filteredAgents, agent)
+			a := &Agent{}
+			err = tc.get(agent.Href, url.Values{}, a)
+			if err != nil {
+				return nil, err
+			}
+			filteredAgents = append(filteredAgents, a)
 		}
 	}
 
@@ -126,7 +133,7 @@ func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) error {
 		if !details.Authorized {
 			path := fmt.Sprintf("%s/authorized", details.Href)
 			body := ioutil.NopCloser(strings.NewReader("true"))
-			tc.put(path, url.Values{}, body)
+			tc.put(path, url.Values{}, body, "text/plain")
 		}
 	}
 

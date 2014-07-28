@@ -13,6 +13,7 @@ var agentCommand = cli.Command{
 			Name: "list",
 			Flags: []cli.Flag{
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: agentListAction,
 		},
@@ -22,6 +23,7 @@ var agentCommand = cli.Command{
 				FlagAgentName,
 				FlagAgentId,
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: agentFindAction,
 		},
@@ -31,6 +33,7 @@ var agentCommand = cli.Command{
 				FlagAgentName,
 				FlagAgentId,
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: agentAuthorizeAction,
 		},
@@ -41,6 +44,7 @@ var agentCommand = cli.Command{
 				FlagAgentName,
 				FlagAgentPoolName,
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: agentAssignToPoolAction,
 		},
@@ -91,6 +95,9 @@ func agentAuthorizeAction(c *cli.Context) {
 func agentAssignToPoolAction(c *cli.Context) {
 	client := Get80Client(c)
 	filters := agentFilters(c)
+	opts := options(c)
+	v80.Trace = opts.Trace
+	v80.Verbose = opts.Verbose
 
 	agentPoolName := c.String(FLAG_AGENT_POOL_NAME)
 	if agentPoolName == "" {
@@ -98,8 +105,12 @@ func agentAssignToPoolAction(c *cli.Context) {
 	}
 	poolFilter := v80.NewAgentPoolFilter(agentPoolName)
 
-	err := client.AssignAgentsToPool(filters, poolFilter)
+	agentsAssigned, err := client.AssignAgentsToPool(filters, poolFilter)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if opts.Verbose {
+		log.Printf("%d agent(s) assigned to pool\n", agentsAssigned)
 	}
 }

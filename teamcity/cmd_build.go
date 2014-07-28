@@ -22,6 +22,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)
@@ -37,6 +38,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 				FlagBuildTypeId,
 				FlagLast,
 			},
@@ -66,6 +68,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 				FlagBuildTypeId,
 			},
 			Action: func(c *cli.Context) {
@@ -102,6 +105,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 				FlagBuildId,
 			},
 			Action: func(c *cli.Context) {
@@ -122,6 +126,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 				FlagBuildId,
 			},
 			Action: func(c *cli.Context) {
@@ -142,6 +147,7 @@ var buildCommand = cli.Command{
 				FlagUsername,
 				FlagPassword,
 				FlagVerbose,
+				FlagTrace,
 				FlagBuildId,
 				FlagArtifactName,
 			},

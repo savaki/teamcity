@@ -1,14 +1,13 @@
 package v80
 
 import (
-	"bytes"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 type AgentPools struct {
@@ -69,38 +68,40 @@ func (tc *TeamCity) FindAgentPools(poolFilter AgentPoolFilter) ([]*AgentPool, er
 	return filtered, nil
 }
 
-func (tc *TeamCity) AssignAgentsToPool(agentFilters AgentFilters, poolFilter AgentPoolFilter) error {
+// AssignAgentsToPool returns the number of agents that were assigned to a pool
+func (tc *TeamCity) AssignAgentsToPool(agentFilters AgentFilters, poolFilter AgentPoolFilter) (int, error) {
 	pools, err := tc.FindAgentPools(poolFilter)
 	if err != nil {
-		return err
+		return 0, err
 
 	} else if len(pools) == 0 {
-		return errors.New("pool filter didn't match any pool")
+		return 0, errors.New("pool filter didn't match any pool")
 
 	} else if len(pools) != 1 {
-		return errors.New("pool filter matched more than one pool")
+		return 0, errors.New("pool filter matched more than one pool")
 	}
 
 	agents, err := tc.FindAgents(agentFilters)
 	if err != nil {
-		return err
+		return 0, err
 	}
+
+	agentsAssigned := 0
 
 	pool := pools[0]
 	path := fmt.Sprintf("%s/agents", pool.Href)
 	for _, agent := range agents {
-		buf := bytes.NewBuffer([]byte{})
-		err := xml.NewEncoder(buf).Encode(agent)
-		if err != nil {
-			return err
-		}
+		if !poolFilter(agent.Pool) {
+			data := fmt.Sprintf(`<?xml version="1.0"?><agent id="%s"/>`, agent.Id)
+			content := ioutil.NopCloser(strings.NewReader(data))
+			_, err = tc.httpFn("POST", path, url.Values{}, content, "application/xml")
+			if err != nil {
+				return agentsAssigned, err
+			}
 
-		content := ioutil.NopCloser(bytes.NewReader(buf.Bytes()))
-		_, err = tc.httpFn("POST", path, url.Values{}, content)
-		if err != nil {
-			return err
+			agentsAssigned = agentsAssigned + 1
 		}
 	}
 
-	return nil
+	return agentsAssigned, nil
 }

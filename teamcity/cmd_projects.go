@@ -11,6 +11,7 @@ var projectCommand = cli.Command{
 			Usage: "list the projects on this server",
 			Flags: []cli.Flag{
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: func(c *cli.Context) {
 				client := Get80Client(c)

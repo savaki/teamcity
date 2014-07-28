@@ -13,6 +13,7 @@ var agentPoolsCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentPoolName,
 				FlagVerbose,
+				FlagTrace,
 			},
 			Action: agentPoolListAction,
 		},
