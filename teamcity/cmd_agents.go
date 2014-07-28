@@ -50,6 +50,29 @@ var agentCommand = cli.Command{
 			Action: agentDeauthorizeAction,
 		},
 		{
+			Name: "remove-deauthorized",
+			Flags: []cli.Flag{
+				FlagAgentName,
+				FlagAgentId,
+				FlagAllAgents,
+				FlagVerbose,
+				FlagTrace,
+				FlagDryRun,
+			},
+			Action: agentRemoveDeauthorizedAction,
+		},
+		{
+			Name: "remove",
+			Flags: []cli.Flag{
+				FlagAgentName,
+				FlagAgentId,
+				FlagAllAgents,
+				FlagVerbose,
+				FlagTrace,
+			},
+			Action: agentDeauthorizeAction,
+		},
+		{
 			Name: "assign-to-pool",
 			Flags: []cli.Flag{
 				FlagAgentPoolName,
@@ -147,6 +170,7 @@ func agentDeauthorizeAction(c *cli.Context) {
 func agentAssignToPoolAction(c *cli.Context) {
 	client := Get80Client(c)
 	filters := agentFilters(c)
+
 	opts := options(c)
 	v80.Trace = opts.Trace
 	v80.Verbose = opts.Verbose
@@ -169,5 +193,22 @@ func agentAssignToPoolAction(c *cli.Context) {
 
 	if opts.Verbose {
 		log.Printf("%d agent(s) assigned to pool\n", agentsAssigned)
+	}
+}
+
+func agentRemoveDeauthorizedAction(c *cli.Context) {
+	client := Get80Client(c)
+
+	opts := options(c)
+	v80.Trace = opts.Trace
+	v80.Verbose = opts.Verbose
+
+	if opts.DryRun {
+		log.Printf("--%s enabled.  agents will not be deleted.\n", FLAG_DRY_RUN)
+	}
+
+	_, err := client.RemoveDeauthorizedAgents(opts.DryRun)
+	if err != nil {
+		log.Fatalln(err)
 	}
 }

@@ -8,6 +8,7 @@ const (
 	FLAG_PASSWORD = "password"
 	FLAG_VERBOSE  = "verbose"
 	FLAG_TRACE    = "trace"
+	FLAG_DRY_RUN  = "dry-run"
 
 	FLAG_AGENT_ID        = "agent-id"
 	FLAG_AGENT_NAME      = "agent-name"
@@ -27,6 +28,7 @@ var (
 	FlagPassword = cli.StringFlag{FLAG_PASSWORD, "", "TeamCity password"}
 	FlagVerbose  = cli.BoolFlag{FLAG_VERBOSE, "additional content"}
 	FlagTrace    = cli.BoolFlag{FLAG_TRACE, "developer level details"}
+	FlagDryRun   = cli.BoolFlag{FLAG_DRY_RUN, "dry-run, don't execute anything"}
 
 	FlagAgentId       = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
 	FlagAgentName     = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
@@ -43,11 +45,13 @@ var (
 type Options struct {
 	Verbose bool
 	Trace   bool
+	DryRun  bool
 }
 
 func options(c *cli.Context) Options {
 	return Options{
 		Verbose: c.Bool(FLAG_VERBOSE) || c.Bool(FLAG_TRACE),
 		Trace:   c.Bool(FLAG_TRACE),
+		DryRun:  c.Bool(FLAG_DRY_RUN),
 	}
 }

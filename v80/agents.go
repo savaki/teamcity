@@ -189,3 +189,69 @@ func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) (int, error) {
 func (tc *TeamCity) DeauthorizeAgents(filters AgentFilters) (int, error) {
 	return tc.authorizeAgents(filters, false)
 }
+
+func (tc *TeamCity) findAgent(id string) (*Agent, error) {
+	body, err := tc.httpFn("GET", fmt.Sprintf("/app/rest/agents/id:%s", id), url.Values{}, nil, "")
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
+
+	agent := &Agent{}
+	err = xml.NewDecoder(body).Decode(agent)
+	return agent, nil
+}
+
+func (tc *TeamCity) FindDeauthorizedAgents() ([]*Agent, error) {
+	matcher := regexp.MustCompile(`(?m)"agentStatus:(\d+)"`)
+
+	values := url.Values{}
+	body, err := tc.httpFn("GET", "/agents.html?tab=unauthorizedAgents&__fragmentId=agentsListInner", values, nil, "")
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
+
+	data, err := ioutil.ReadAll(body)
+	if err != nil {
+		return nil, err
+	}
+
+	// find the ids for the matching agents
+	agents := []*Agent{}
+	for _, values := range matcher.FindAllStringSubmatch(string(data), -1) {
+		id := values[1]
+		agent, err := tc.findAgent(id)
+		if err != nil {
+			return nil, err
+		}
+
+		agents = append(agents, agent)
+	}
+	return agents, nil
+}
+
+func (tc *TeamCity) RemoveDeauthorizedAgents(dryRun bool) (int, error) {
+	agents, err := tc.FindDeauthorizedAgents()
+	if err != nil {
+		return 0, err
+	}
+
+	count := 0
+	for _, agent := range agents {
+		if agent.Connected == false && agent.Authorized == false {
+			if Verbose {
+				log.Printf("removing agent, %s (%s)\n", agent.Name, agent.Ip)
+			}
+			if dryRun == false {
+				_, err := tc.httpFn("DELETE", agent.Href, url.Values{}, nil, "")
+				if err != nil {
+					return count, err
+				}
+			}
+			count = count + 1
+		}
+	}
+
+	return count, nil
+}
