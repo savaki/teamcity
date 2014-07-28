@@ -117,30 +117,52 @@ func (tc *TeamCity) FindAgents(filters AgentFilters) ([]*Agent, error) {
 	return filteredAgents, nil
 }
 
-func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) (int, error) {
+func (tc *TeamCity) authorizeAgents(filters AgentFilters, authorized bool) (int, error) {
+	if Trace {
+		log.Printf("TeamCity#authorizeAgents(%v)\n", authorized)
+	}
 	agents, err := tc.FindAgents(filters)
 	if err != nil {
 		return 0, err
 	}
 
-	agentsAuthorized := 0
+	if Trace {
+		log.Printf("found %d matching agents\n", len(agents))
+	}
+
+	count := 0
 	for _, agent := range agents {
 		details := &Agent{}
 		err = tc.get(agent.Href, url.Values{}, details)
 		if err != nil {
-			return agentsAuthorized, err
+			return count, err
 		}
 
-		if !details.Authorized {
+		if details.Authorized != authorized {
 			if Verbose {
-				log.Printf("authorizing agent, %s (%s)\n", agent.Name, agent.Ip)
+				if authorized {
+					log.Printf("authorizing agent, %s (%s)\n", agent.Name, agent.Ip)
+
+				} else {
+					log.Printf("deauthorizing agent, %s (%s)\n", agent.Name, agent.Ip)
+
+				}
 			}
 			path := fmt.Sprintf("%s/authorized", details.Href)
-			body := ioutil.NopCloser(strings.NewReader("true"))
+			content := fmt.Sprintf("%v", authorized)
+			body := ioutil.NopCloser(strings.NewReader(content))
 			tc.put(path, url.Values{}, body, "text/plain")
-			agentsAuthorized = agentsAuthorized + 1
+			count = count + 1
 		}
 	}
 
-	return agentsAuthorized, nil
+	return count, nil
+}
+
+func (tc *TeamCity) AuthorizeAgents(filters AgentFilters) (int, error) {
+	return tc.authorizeAgents(filters, true)
+}
+
+func (tc *TeamCity) DeauthorizeAgents(filters AgentFilters) (int, error) {
+	return tc.authorizeAgents(filters, false)
 }

@@ -38,6 +38,16 @@ var agentCommand = cli.Command{
 			Action: agentAuthorizeAction,
 		},
 		{
+			Name: "deauthorize",
+			Flags: []cli.Flag{
+				FlagAgentName,
+				FlagAgentId,
+				FlagVerbose,
+				FlagTrace,
+			},
+			Action: agentDeauthorizeAction,
+		},
+		{
 			Name: "assign-to-pool",
 			Flags: []cli.Flag{
 				FlagAgentId,
@@ -99,6 +109,23 @@ func agentAuthorizeAction(c *cli.Context) {
 
 	if opts.Verbose {
 		log.Printf("%d agent(s) authorized\n", agentsAuthorized)
+	}
+}
+
+func agentDeauthorizeAction(c *cli.Context) {
+	client := Get80Client(c)
+	filters := agentFilters(c)
+	opts := options(c)
+	v80.Verbose = opts.Verbose
+	v80.Trace = opts.Trace
+
+	agentsAuthorized, err := client.DeauthorizeAgents(filters)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if opts.Verbose {
+		log.Printf("%d agent(s) deauthorized\n", agentsAuthorized)
 	}
 }
 
