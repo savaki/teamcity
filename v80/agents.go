@@ -76,6 +76,12 @@ func AgentNameAccessor(agent *Agent) string {
 	return agent.Name
 }
 
+func NoopAgentFilter(result bool) AgentFilter {
+	return func(*Agent) bool {
+		return result
+	}
+}
+
 func NewAgentFilter(name string, accessor AgentAccessor) AgentFilter {
 	matcher, err := regexp.Compile(name)
 	if err != nil {

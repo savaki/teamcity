@@ -32,6 +32,7 @@ var agentCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentName,
 				FlagAgentId,
+				FlagAllAgents,
 				FlagVerbose,
 				FlagTrace,
 			},
@@ -42,6 +43,7 @@ var agentCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentName,
 				FlagAgentId,
+				FlagAllAgents,
 				FlagVerbose,
 				FlagTrace,
 			},
@@ -52,6 +54,7 @@ var agentCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentId,
 				FlagAgentName,
+				FlagAllAgents,
 				FlagAgentPoolName,
 				FlagVerbose,
 				FlagTrace,
@@ -63,6 +66,10 @@ var agentCommand = cli.Command{
 
 func agentFilters(c *cli.Context) v80.AgentFilters {
 	filters := []v80.AgentFilter{}
+
+	if c.Bool(FLAG_ALL_AGENTS) {
+		return append(filters, v80.NoopAgentFilter(true))
+	}
 
 	// filter by id
 	if values := c.StringSlice(FLAG_AGENT_ID); values != nil {
