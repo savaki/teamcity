@@ -52,7 +52,7 @@ var agentCommand = cli.Command{
 			Action: agentDeauthorizeAction,
 		},
 		{
-			Name: "remove-deauthorized",
+			Name: "remove",
 			Flags: []cli.Flag{
 				FlagAgentName,
 				FlagAgentId,
@@ -62,17 +62,6 @@ var agentCommand = cli.Command{
 				FlagDryRun,
 			},
 			Action: agentRemoveDeauthorizedAction,
-		},
-		{
-			Name: "remove",
-			Flags: []cli.Flag{
-				FlagAgentName,
-				FlagAgentId,
-				FlagAllAgents,
-				FlagVerbose,
-				FlagTrace,
-			},
-			Action: agentDeauthorizeAction,
 		},
 		{
 			Name: "assign-to-pool",
