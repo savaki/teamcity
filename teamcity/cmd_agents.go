@@ -52,10 +52,10 @@ var agentCommand = cli.Command{
 		{
 			Name: "assign-to-pool",
 			Flags: []cli.Flag{
+				FlagAgentPoolName,
 				FlagAgentId,
 				FlagAgentName,
 				FlagAllAgents,
-				FlagAgentPoolName,
 				FlagVerbose,
 				FlagTrace,
 			},
