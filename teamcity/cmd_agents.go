@@ -71,6 +71,7 @@ var agentCommand = cli.Command{
 				FlagAllAgents,
 				FlagVerbose,
 				FlagTrace,
+				FlagDryRun,
 			},
 			Action: agentAssignToPoolAction,
 		},
@@ -185,6 +186,7 @@ func agentAssignToPoolAction(c *cli.Context) {
 	opts := options(c)
 	v80.Trace = opts.Trace
 	v80.Verbose = opts.Verbose
+	v80.DryRun = opts.DryRun
 
 	if filters.IsEmpty() {
 		log.Fatalf("agents must be specified via either --%s or --%s\n", FLAG_AGENT_ID, FLAG_AGENT_NAME)

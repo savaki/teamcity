@@ -1,6 +1,7 @@
 package v80
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/xml"
 	"errors"
@@ -10,18 +11,20 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 )
 
-var Verbose bool = false
 var Trace bool = false
+var Verbose bool = false
+var DryRun bool = false
 
 type TeamCity struct {
-	httpFn func(method, path string, params url.Values, body io.ReadCloser, contentType string) (io.ReadCloser, error)
+	httpFn func(method, path string, params url.Values, body io.Reader, contentType string) (io.ReadCloser, error)
 }
 
-func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(method, path string, params url.Values, body io.ReadCloser, contentType string) (io.ReadCloser, error) {
-	return func(method, path string, params url.Values, body io.ReadCloser, contentType string) (io.ReadCloser, error) {
+func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(method, path string, params url.Values, body io.Reader, contentType string) (io.ReadCloser, error) {
+	return func(method, path string, params url.Values, body io.Reader, contentType string) (io.ReadCloser, error) {
 		urlStr := fmt.Sprintf("%s%s", codebase, path)
 		queryParams := params.Encode()
 		if len(queryParams) > 0 {
@@ -32,6 +35,23 @@ func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(meth
 			log.Printf("%s %s\n", method, urlStr)
 		}
 
+		// calculate the Content-Length
+		contentLength := 0
+		if body != nil {
+			// determine the content length
+			data, err := ioutil.ReadAll(body)
+			if err != nil {
+				return nil, err
+			}
+			switch readCloser := body.(type) {
+			case io.ReadCloser:
+				defer readCloser.Close()
+			}
+
+			body = bytes.NewReader(data)
+			contentLength = len(data)
+		}
+
 		req, err := http.NewRequest(method, urlStr, body)
 		if err != nil {
 			return nil, err
@@ -39,6 +59,10 @@ func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(meth
 
 		if contentType != "" {
 			req.Header.Add("Content-Type", contentType)
+		}
+
+		if contentLength != 0 {
+			req.ContentLength = int64(contentLength)
 		}
 
 		req.SetBasicAuth(auth.Username, auth.Password)
@@ -60,7 +84,7 @@ func httpFn(client *http.Client, auth *teamcity.Auth, codebase string) func(meth
 					fmt.Println(string(data))
 				}
 			}
-			return nil, errors.New(fmt.Sprintf("%s %s return status code, %d", method, urlStr, response.StatusCode))
+			return nil, errors.New(fmt.Sprintf("%s %s returned status code, %d", method, urlStr, response.StatusCode))
 		}
 
 		return response.Body, nil
@@ -75,6 +99,10 @@ func (t *TeamCity) get(path string, params url.Values, target interface{}) error
 	body, err := t.httpFn("GET", path, params, nil, "application/xml")
 	if err != nil {
 		return err
+	}
+
+	if target == nil {
+		return nil
 	}
 
 	switch value := target.(type) {
@@ -99,8 +127,12 @@ func New(auth *teamcity.Auth, codebase string) *TeamCity {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
+
+	cookieJar, _ := cookiejar.New(nil)
+
 	client := &http.Client{
 		Transport: transport,
+		Jar:       cookieJar,
 	}
 
 	return &TeamCity{

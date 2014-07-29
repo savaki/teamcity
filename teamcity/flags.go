@@ -56,7 +56,7 @@ type Options struct {
 
 func options(c *cli.Context) Options {
 	return Options{
-		Verbose: c.Bool(FLAG_VERBOSE) || c.Bool(FLAG_TRACE),
+		Verbose: c.Bool(FLAG_VERBOSE) || c.Bool(FLAG_TRACE) || c.Bool(FLAG_DRY_RUN),
 		Trace:   c.Bool(FLAG_TRACE),
 		DryRun:  c.Bool(FLAG_DRY_RUN),
 	}

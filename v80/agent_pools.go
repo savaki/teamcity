@@ -2,8 +2,6 @@ package v80
 
 import (
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"regexp"
@@ -68,6 +66,26 @@ func (tc *TeamCity) FindAgentPools(poolFilter AgentPoolFilter) ([]*AgentPool, er
 	return filtered, nil
 }
 
+func (tc *TeamCity) assignAgentToPool(agent *Agent, pool *AgentPool) error {
+	typeId := "pool-agent-types-popup"
+
+	params := url.Values{}
+	params.Add("init", "1")
+	params.Add("typeId", typeId)
+	params.Add("contextId", pool.Id)
+	err := tc.get("/popupDialog.html", params, nil)
+	if err != nil {
+		return err
+	}
+
+	params = url.Values{}
+	params.Add("typeId", typeId)
+	params.Add("action", "apply")
+	params.Add("checkedItemId", agent.Id)
+	_, err = tc.httpFn("POST", "/popupDialog.html", url.Values{}, strings.NewReader(params.Encode()), "application/x-www-form-urlencoded; charset=UTF-8")
+	return err
+}
+
 // AssignAgentsToPool returns the number of agents that were assigned to a pool
 func (tc *TeamCity) AssignAgentsToPool(agentFilters AgentFilters, poolFilter AgentPoolFilter) (int, error) {
 	pools, err := tc.FindAgentPools(poolFilter)
@@ -89,17 +107,17 @@ func (tc *TeamCity) AssignAgentsToPool(agentFilters AgentFilters, poolFilter Age
 	agentsAssigned := 0
 
 	pool := pools[0]
-	path := fmt.Sprintf("%s/agents", pool.Href)
+	//	path := fmt.Sprintf("%s/agents", pool.Href)
 	for _, agent := range agents {
 		if !poolFilter(agent.Pool) {
 			if Verbose {
 				log.Printf("assigning agent, %s (%s), to pool, %s\n", agent.Name, agent.Ip, pool.Name)
 			}
-			data := fmt.Sprintf(`<?xml version="1.0"?><agent id="%s"/>`, agent.Id)
-			content := ioutil.NopCloser(strings.NewReader(data))
-			_, err = tc.httpFn("POST", path, url.Values{}, content, "application/xml")
-			if err != nil {
-				return agentsAssigned, err
+			if !DryRun {
+				err = tc.assignAgentToPool(agent, pool)
+				if err != nil {
+					return agentsAssigned, err
+				}
 			}
 
 			agentsAssigned = agentsAssigned + 1
