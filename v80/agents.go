@@ -76,6 +76,20 @@ func AgentNameAccessor(agent *Agent) string {
 	return agent.Name
 }
 
+func NewAgentPropertyAccessor(propertyName string) AgentAccessor {
+	return func(agent *Agent) string {
+		if agent.Properties != nil {
+			for _, property := range agent.Properties {
+				if property.Name == propertyName {
+					return property.Value
+				}
+			}
+		}
+
+		return ""
+	}
+}
+
 func AgentConnectedAccessor(agent *Agent) string {
 	return fmt.Sprintf("%#v", agent.Connected)
 }

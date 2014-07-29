@@ -9,10 +9,12 @@ const (
 	FLAG_VERBOSE  = "verbose"
 	FLAG_TRACE    = "trace"
 	FLAG_DRY_RUN  = "dry-run"
+	FLAG_LONG     = "long"
 
 	FLAG_AGENT_ID          = "agent-id"
 	FLAG_AGENT_NAME        = "agent-name"
 	FLAG_AGENT_POOL_NAME   = "agent-pool-name"
+	FLAG_AGENT_PROPERTY    = "agent-property"
 	FLAG_ALL_AGENTS        = "all-agents"
 	FLAG_DISCONNECTED_ONLY = "disconnected-only"
 
@@ -30,9 +32,11 @@ var (
 	FlagVerbose  = cli.BoolFlag{FLAG_VERBOSE, "additional content"}
 	FlagTrace    = cli.BoolFlag{FLAG_TRACE, "developer level details"}
 	FlagDryRun   = cli.BoolFlag{FLAG_DRY_RUN, "dry-run, don't execute anything"}
+	FlagLong     = cli.BoolFlag{FLAG_LONG, "show additional details"}
 
 	FlagAgentId          = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
 	FlagAgentName        = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
+	FlagAgentProperty    = cli.StringSliceFlag{FLAG_AGENT_PROPERTY, &cli.StringSlice{}, "filter by agent property ex. teamcity.agent.name=[12]"}
 	FlagAgentPoolName    = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)"}
 	FlagAllAgents        = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents"}
 	FlagDisconnectedOnly = cli.BoolFlag{FLAG_DISCONNECTED_ONLY, "include disconnected agents only"}

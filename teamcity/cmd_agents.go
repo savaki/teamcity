@@ -5,6 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/savaki/teamcity/v80"
 	"log"
+	"strings"
 )
 
 var agentCommand = cli.Command{
@@ -13,26 +14,21 @@ var agentCommand = cli.Command{
 		{
 			Name: "list",
 			Flags: []cli.Flag{
+				FlagAgentName,
+				FlagAgentId,
+				FlagAgentProperty,
+				FlagLong,
 				FlagVerbose,
 				FlagTrace,
 			},
 			Action: agentListAction,
 		},
 		{
-			Name: "find",
-			Flags: []cli.Flag{
-				FlagAgentName,
-				FlagAgentId,
-				FlagVerbose,
-				FlagTrace,
-			},
-			Action: agentFindAction,
-		},
-		{
 			Name: "authorize",
 			Flags: []cli.Flag{
 				FlagAgentName,
 				FlagAgentId,
+				FlagAgentProperty,
 				FlagAllAgents,
 				FlagVerbose,
 				FlagTrace,
@@ -45,6 +41,7 @@ var agentCommand = cli.Command{
 				FlagAgentName,
 				FlagAgentId,
 				FlagAllAgents,
+				FlagAgentProperty,
 				FlagDisconnectedOnly,
 				FlagVerbose,
 				FlagTrace,
@@ -56,6 +53,7 @@ var agentCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentName,
 				FlagAgentId,
+				FlagAgentProperty,
 				FlagAllAgents,
 				FlagVerbose,
 				FlagTrace,
@@ -68,6 +66,7 @@ var agentCommand = cli.Command{
 			Flags: []cli.Flag{
 				FlagAgentPoolName,
 				FlagAgentId,
+				FlagAgentProperty,
 				FlagAgentName,
 				FlagAllAgents,
 				FlagVerbose,
@@ -88,6 +87,19 @@ func agentFilters(c *cli.Context) v80.AgentFilters {
 	if c.Bool(FLAG_DISCONNECTED_ONLY) {
 		value := fmt.Sprintf("%#v", false)
 		filters = append(filters, v80.NewAgentFilter(value, v80.AgentConnectedAccessor))
+	}
+
+	// filter by agent property
+	if values := c.StringSlice(FLAG_AGENT_PROPERTY); values != nil {
+		for _, value := range values {
+			parts := strings.Split(value, "=")
+			if len(parts) != 2 {
+				log.Fatalf("invalid value for --%s, %s.  expected something like --%s teamcity.agent-name=agent[12]", FLAG_AGENT_PROPERTY, value, FLAG_AGENT_PROPERTY)
+			}
+			accessor := v80.NewAgentPropertyAccessor(parts[0])
+			filter := v80.NewAgentFilter(parts[1], accessor)
+			filters = append(filters, filter)
+		}
 	}
 
 	// filter by id
@@ -111,14 +123,17 @@ func agentFilters(c *cli.Context) v80.AgentFilters {
 
 func agentListAction(c *cli.Context) {
 	client := Get80Client(c)
-	Print(client.Agents())
-}
-
-func agentFindAction(c *cli.Context) {
-	client := Get80Client(c)
 	filters := agentFilters(c)
 
-	Print(client.FindAgents(filters))
+	agents, err := client.FindAgents(filters)
+
+	if !c.Bool(FLAG_LONG) {
+		for _, agent := range agents {
+			agent.Properties = nil
+		}
+	}
+
+	Print(agents, err)
 }
 
 func agentAuthorizeAction(c *cli.Context) {
