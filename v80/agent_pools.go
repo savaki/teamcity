@@ -66,22 +66,27 @@ func (tc *TeamCity) FindAgentPools(poolFilter AgentPoolFilter) ([]*AgentPool, er
 	return filtered, nil
 }
 
-func (tc *TeamCity) assignAgentToPool(agent *Agent, pool *AgentPool) error {
+// assignAgentsToPool - sadly this involves screen scraping
+func (tc *TeamCity) assignAgentsToPool(agents []*Agent, pool *AgentPool) error {
 	typeId := "pool-agent-types-popup"
 
+	// Request #1 - sets the pool context
 	params := url.Values{}
-	params.Add("init", "1")
 	params.Add("typeId", typeId)
 	params.Add("contextId", pool.Id)
+
 	err := tc.get("/popupDialog.html", params, nil)
 	if err != nil {
 		return err
 	}
 
+	// Request #2 - apply
 	params = url.Values{}
 	params.Add("typeId", typeId)
 	params.Add("action", "apply")
-	params.Add("checkedItemId", agent.Id)
+	for _, agent := range agents {
+		params.Add("checkedItemId", agent.TypeId)
+	}
 	_, err = tc.httpFn("POST", "/popupDialog.html", url.Values{}, strings.NewReader(params.Encode()), "application/x-www-form-urlencoded; charset=UTF-8")
 	return err
 }
@@ -99,30 +104,29 @@ func (tc *TeamCity) AssignAgentsToPool(agentFilters AgentFilters, poolFilter Age
 		return 0, errors.New("pool filter matched more than one pool")
 	}
 
-	agents, err := tc.FindAgents(agentFilters)
+	allAgents, err := tc.FindAgents(agentFilters)
 	if err != nil {
 		return 0, err
 	}
 
-	agentsAssigned := 0
-
+	agents := []*Agent{}
 	pool := pools[0]
-	//	path := fmt.Sprintf("%s/agents", pool.Href)
-	for _, agent := range agents {
+	for _, agent := range allAgents {
 		if !poolFilter(agent.Pool) {
 			if Verbose {
-				log.Printf("assigning agent, %s (%s), to pool, %s\n", agent.Name, agent.Ip, pool.Name)
+				log.Printf("assigning agent, %s (id:%s; typeId:%s; ip:%s), to pool, %s\n", agent.Name, agent.Id, agent.TypeId, agent.Ip, pool.Name)
 			}
-			if !DryRun {
-				err = tc.assignAgentToPool(agent, pool)
-				if err != nil {
-					return agentsAssigned, err
-				}
-			}
-
-			agentsAssigned = agentsAssigned + 1
+			agents = append(agents, agent)
 		}
 	}
 
-	return agentsAssigned, nil
+	if !DryRun {
+		err = tc.assignAgentsToPool(agents, pool)
+		if err != nil {
+			return len(agents), err
+		}
+
+	}
+
+	return len(agents), err
 }
