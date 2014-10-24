@@ -26,26 +26,26 @@ const (
 )
 
 var (
-	FlagUrl      = cli.StringFlag{FLAG_URL, "", "url of the TeamCity server"}
-	FlagUsername = cli.StringFlag{FLAG_USERNAME, "", "TeamCity username"}
-	FlagPassword = cli.StringFlag{FLAG_PASSWORD, "", "TeamCity password"}
-	FlagVerbose  = cli.BoolFlag{FLAG_VERBOSE, "additional content"}
-	FlagTrace    = cli.BoolFlag{FLAG_TRACE, "developer level details"}
-	FlagDryRun   = cli.BoolFlag{FLAG_DRY_RUN, "dry-run, don't execute anything"}
-	FlagLong     = cli.BoolFlag{FLAG_LONG, "show additional details"}
+	FlagUrl      = cli.StringFlag{FLAG_URL, "", "url of the TeamCity server", ""}
+	FlagUsername = cli.StringFlag{FLAG_USERNAME, "", "TeamCity username", ""}
+	FlagPassword = cli.StringFlag{FLAG_PASSWORD, "", "TeamCity password", ""}
+	FlagVerbose  = cli.BoolFlag{FLAG_VERBOSE, "additional content", ""}
+	FlagTrace    = cli.BoolFlag{FLAG_TRACE, "developer level details", ""}
+	FlagDryRun   = cli.BoolFlag{FLAG_DRY_RUN, "dry-run, don't execute anything", ""}
+	FlagLong     = cli.BoolFlag{FLAG_LONG, "show additional details", ""}
 
-	FlagAgentId          = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)"}
-	FlagAgentName        = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)"}
-	FlagAgentProperty    = cli.StringSliceFlag{FLAG_AGENT_PROPERTY, &cli.StringSlice{}, "filter by agent property ex. teamcity.agent.name=[12]"}
-	FlagAgentPoolName    = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)"}
-	FlagAllAgents        = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents"}
-	FlagDisconnectedOnly = cli.BoolFlag{FLAG_DISCONNECTED_ONLY, "include disconnected agents only"}
+	FlagAgentId          = cli.StringSliceFlag{FLAG_AGENT_ID, &cli.StringSlice{}, "filter agent name (regexp)", ""}
+	FlagAgentName        = cli.StringSliceFlag{FLAG_AGENT_NAME, &cli.StringSlice{}, "filter by agent name (regexp)", ""}
+	FlagAgentProperty    = cli.StringSliceFlag{FLAG_AGENT_PROPERTY, &cli.StringSlice{}, "filter by agent property ex. teamcity.agent.name=[12]", ""}
+	FlagAgentPoolName    = cli.StringFlag{FLAG_AGENT_POOL_NAME, "", "specify an agent pool by name (regexp)", ""}
+	FlagAllAgents        = cli.BoolFlag{FLAG_ALL_AGENTS, "include all agents", ""}
+	FlagDisconnectedOnly = cli.BoolFlag{FLAG_DISCONNECTED_ONLY, "include disconnected agents only", ""}
 
-	FlagBuildId      = cli.StringFlag{FLAG_BUILD_ID, "", "the build to retrieve details for"}
-	FlagBuildTypeId  = cli.StringFlag{FLAG_BUILD_TYPE_ID, "", "the build type id"}
-	FlagArtifactName = cli.StringFlag{FLAG_BUILD_ARTIFACT_NAME, "", "the filename of the artifact to download"}
+	FlagBuildId      = cli.StringFlag{FLAG_BUILD_ID, "", "the build to retrieve details for", ""}
+	FlagBuildTypeId  = cli.StringFlag{FLAG_BUILD_TYPE_ID, "", "the build type id", ""}
+	FlagArtifactName = cli.StringFlag{FLAG_BUILD_ARTIFACT_NAME, "", "the filename of the artifact to download", ""}
 
-	FlagLast = cli.IntFlag{FLAG_LAST, 1, "how many builds to retrieve"}
+	FlagLast = cli.IntFlag{FLAG_LAST, 1, "how many builds to retrieve", ""}
 )
 
 type Options struct {

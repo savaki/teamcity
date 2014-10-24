@@ -26,3 +26,4 @@ func (tc *TeamCity) Projects() (*Projects, error) {
 	err = tc.get(server.Projects.Href, url.Values{}, projects)
 	return projects, err
 }
+
