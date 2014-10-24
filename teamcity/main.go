@@ -32,7 +32,7 @@ func Get80Client(c *cli.Context) *v80.TeamCity {
 		codebase = value
 	}
 	if codebase == "" {
-		log.Fatalln("ERROR: TeamCity url not set")
+		log.Fatalln("ERROR: TEAMCITY_URL not set")
 	}
 
 	username := os.Getenv(teamcity.TEAMCITY_USERNAME)
@@ -40,7 +40,7 @@ func Get80Client(c *cli.Context) *v80.TeamCity {
 		username = value
 	}
 	if username == "" {
-		log.Fatalln("ERROR: TeamCity username not set")
+		log.Fatalln("ERROR: TEAMCITY_USERNAME not set")
 	}
 
 	password := os.Getenv(teamcity.TEAMCITY_PASSWORD)
@@ -48,7 +48,7 @@ func Get80Client(c *cli.Context) *v80.TeamCity {
 		password = value
 	}
 	if username == "" {
-		log.Fatalln("ERROR: TeamCity password not set")
+		log.Fatalln("ERROR: TEAMCITY_PASSWORD not set")
 	}
 
 	auth := teamcity.New(username, password)
