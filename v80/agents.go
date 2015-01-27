@@ -132,7 +132,9 @@ func (tc *TeamCity) Agents() (*Agents, error) {
 	}
 
 	agents := &Agents{}
-	err = tc.get(server.Agents.Href, url.Values{}, agents)
+	values := url.Values{}
+	values.Set("includeUnauthorized", "true")
+	err = tc.get(server.Agents.Href, values, agents)
 	return agents, err
 }
 
